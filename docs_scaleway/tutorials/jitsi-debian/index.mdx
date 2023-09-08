@@ -1,0 +1,87 @@
+---
+meta:
+  title: Installing Jitsi Meet on Debian Buster
+  description: This page shows you how to install Jitsi Meet Videoconferencing on Debian Buster (10)
+content:
+  h1: Installing Jitsi Meet on Debian Buster
+  paragraph: This page shows you how to install Jitsi Meet Videoconferencing on Debian Buster (10)
+categories:
+  - compute
+tags: compute mediaserver media video-sharing conference-call Jitsi-Meet Debian-Buster
+dates:
+  validation: 2023-06-08
+  posted: 2020-03-16
+---
+
+Jitsi Meet is a fully encrypted, open source video conferencing tool that does not require subscription or the need to create an account.
+
+The tool provides features like:
+
+- screen sharing
+- presentations
+- inviting users to a conference through a custom URL
+- editing documents together using Etherpad
+- integrated chat
+
+<Macro id="iam-requirements" />
+
+<Message type="requirement">
+  - You have an account and are logged into the [Scaleway console](https://console.scaleway.com)
+  - You have [configured your SSH key](/console/my-project/how-to/create-ssh-key/)
+  - You have a [Scaleway Instance](/compute/instances/how-to/create-an-instance/) running Debian Buster (for better performance, we recommend that you use an Instance with **at least 4 GB of RAM**)
+  - You have a domain or subdomain pointed to your Instance
+</Message>
+
+<Message type="note">
+  This tutorial shows the installation of Jitsi Meet on Debian Buster. If you prefer the installation of Jitsi Meet on Ubuntu Bionic Beaver, follow [this tutorial](/tutorials/jitsi-ubuntu-bionic).
+</Message>
+
+### Installing Jitsi Meet
+
+1. Configure the hostname of the server corresponding to your domain or subdomain.
+    ```
+    hostnamectl set-hostname jitsi
+    sed -i 's/^127.0.1.1.*$/127.0.1.1 jitsi.mydomain.tld jitsi/g' /etc/hosts
+    sed -i 's/^127.0.0.1.*$/127.0.0.1 localhost jitsi.mydomain.tld jitsi/g' /etc/hosts
+    ```
+2. Update the apt packet cache and upgrade the software installed on the Instance to the latest version available on the Debian repositories.
+    ```
+    apt update && apt upgrade
+    ```
+3. Install an [Nginx](https://nginx.org) web server. The Jitsi installation tool handles the Nginx configuration if it is present on the system.
+    ```
+    apt install -y nginx
+    systemctl start nginx.service
+    systemctl enable nginx.service
+    ```
+
+    <Message type="important">
+    If you have not installed Nginx or Apache, Jitsi Meet will automatically install [Jetty](https://www.eclipse.org/jetty/) during the installation.
+    </Message>
+
+4. Download the APT key and set up the repositories of Jitsi:
+    ```
+    wget -qO - https://download.jitsi.org/jitsi-key.gpg.key | apt-key add -
+    sh -c "echo 'deb https://download.jitsi.org stable/' > /etc/apt/sources.list.d/jitsi-stable.list"
+    apt update
+    ```
+5. Launch the installation of Jitsi Meet.
+    ```
+    apt install -y jitsi-meet
+    ```
+    When asked:
+
+      - Enter the FQDN of your Instance. For example `jitsi.mydomain.tld` and press **Enter**.
+      - Choose the `Generate a new self-signed certificate (You will later get a chance to obtain a Let's Encrypt certificate)` option as a SSL certificate and press **Enter**.
+6. Run the following script to generate a [Let's Encrypt](https://letsencrypt.org) SSL certificate for your Instance:
+    ```
+    /usr/share/jitsi-meet/scripts/install-letsencrypt-cert.sh
+    ```
+
+    <Message type="tip">
+    If the generation of the Let's Encrypt certificate fails, run the following command: `dpkg-reconfigure jitsi-meet-web-config` to reconfigure the package `jitsi-meet-web-config` before relaunching the certificate request.
+    </Message>
+7. Open a Web-browser and type the FQDN of your Instance, for example: `https://jitsi.mydomain.tld`. The following screen displays:
+    <Lightbox src="scaleway-jitsi_home_2.webp" alt="" />
+8. Enter a name for your conference and press `Start meeting` to enter the conference room.
+    <Lightbox src="scaleway-jitsi-meet-conf-call-2.webp" alt="" />

@@ -1,0 +1,104 @@
+---
+meta:
+  title: How to send metrics and logs to your Cockpit
+  description: This page shows you how to send metrics and logs to your Cockpit
+content:
+  h1: How to send metrics and logs to your Cockpit
+  paragraph: This page shows you how to send metrics and logs to your Cockpit
+tags: metrics cockpit logs observability
+categories:
+  - observability
+dates:
+  validation: 2023-02-09
+  posted: 2022-10-31
+---
+
+This page shows you how to send [metrics](/observability/cockpit/concepts/#metric) and [logs](/observability/cockpit/concepts/#logs) to your [Cockpit](/observability/cockpit/concepts/#cockpit). The Observability Cockpit provides you with 2 Remote Write endpoints to be able to push metrics and logs. You can push metrics with any `Prometheus Remote Write` compatible agent such as the [Prometheus](https://prometheus.io/docs/introduction/overview/), [Grafana](https://grafana.com/docs/agent/latest/) or [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) agents.
+You can push logs with any Loki compatible agent such as the [Promtail](https://grafana.com/docs/loki/latest/clients/promtail/), [Fluentd](https://docs.fluentd.org/), [Fluent Bit](https://docs.fluentbit.io/manual/) or [Logstash](https://www.elastic.co/guide/en/logstash/current/introduction.html) agents.
+
+<Macro id="iam-requirements" />
+
+<Message type="requirement">
+  - You have an account and are logged into the [Scaleway Console](https://console.scaleway.com/)
+  - You have [activated your Cockpit](/observability/cockpit/how-to/activate-cockpit/)
+</Message>
+
+<Message type="important">
+ - Having the default configuration on your agents might lead to more of your resources' metrics being sent, a high consumption and a high bill at the end of the month.
+ - Sending metrics and logs for Scaleway resources or personal data using an external path is a billable feature. In addition, any data that you push yourself is billed, even if you send data from Scaleway products. Refer to the [product pricing](https://www.scaleway.com/en/pricing/?tags=available,managedservices-observability-cockpit) for more information.
+</Message>
+
+1. Click **Cockpit** in the Observability section of the [console](https://console.scaleway.com/) side menu. The **Cockpit** overview page displays.
+2. [Generate a token](/observability/cockpit/how-to/create-token) from the **APIs and Tokens** tab. .
+3. Check **Metrics** and **Logs** for the **Push** permission when selecting your token permissions, so your token can write logs and metrics.
+    <Lightbox src="scaleway_token_permissions_external_data.webp" alt="" />
+
+    <Message type="important">
+     Once you have created your token, your secret key displays only once. Make sure you copy and save it before you exit the page.
+    </Message>
+4. Configure your applications to send metrics and logs to your Cockpit [endpoints](/observability/cockpit/concepts/#endpoints), using your newly-created token for authentication.
+
+    <Message type="important">
+     - The `Prometheus Remote Write` endpoint to push your metrics is the following: `https://metrics.cockpit.fr-par.scw.cloud/api/v1/push`
+     - The Remote Write endpoint to push your logs is the following: `https://logs.cockpit.fr-par.scw.cloud/loki/api/v1/push`
+    </Message>
+
+    <Concept opened>
+
+    ## Example: send Python logs to your Scaleway Cockpit on a new logs dashboard
+
+    We need to install [logging_loki](https://pypi.org/project/python-logging-loki/) using the command `pip install python-logging-loki`.
+
+    The following output displays:
+
+    ```
+    snippet_python_to_scw_cockpit.py
+
+    import logging
+    import logging_loki
+
+
+    handler = logging_loki.LokiHandler(
+        url="https://logs.cockpit.fr-par.scw.cloud/loki/api/v1/push",
+        tags={"job": "logs_from_python"},
+        auth=("api_key", "YOUR_COCKPIT_API_KEY_WITH_PUSH_LOGS_AUTHORIZATION"),
+        version="1",
+    )
+
+    logger = logging.getLogger("my-first-python-logger")
+    logger.addHandler(handler)
+    logger.error(
+        "Logging a python error with Scaleway cockpit example",
+        extra={"tags": {"service": "my-service"}},
+        )
+    ```
+
+    <Message type="tip">
+      If you are using the Scaleway Loki API, you can `POST` through the `Authorization: Bearer <token>` header, or `POST` directly using the following endpoint: `https://api_key:YOUR_COCKPIT_API_KEY@logs.cockpit.fr-par.scw.cloud/loki/api/v1/push`
+    </Message>
+
+    Python logs are sent to your Cockpit from the Scaleway Loki API. Complete the following steps to retrieve them on the Scaleway Cockpit with Grafana:
+
+    * Choose a [Grafana logs dashboard](https://grafana.com/grafana/dashboards/13639-logs-app/).
+    * [Log into Grafana](/observability/cockpit/how-to/access-grafana-and-managed-dashboards/) using your [Grafana credentials](/observability/cockpit/how-to/retrieve-grafana-credentials/).
+    * Click the **Dashboards** icon, then click **Browse**.
+        <Lightbox src="scaleway_obs_dashboards_browse.webp" alt="" />
+    * Click **New** on the top right corner of your screen and **Import** to import your Grafana dashboard.
+    * Load the URL for the [Grafana logs dashboard](https://grafana.com/grafana/dashboards/13639-logs-app/) or enter `13639` in the ID field.
+    * You can view your log line from the Python snippet.
+
+    <Lightbox src="scaleway_cockpit_show_python_logs.webp" alt="scaleway cockpit show python logs.webp" />
+
+    </Concept>
+
+5. [Log in to your Grafana account](/observability/cockpit/how-to/access-grafana-and-managed-dashboards).
+6. Create your [Grafana dashboard](/observability/cockpit/how-to/access-grafana-and-managed-dashboards) and start monitoring your data.
+
+<Message type="tip">
+  To go further, find out [how to configure the Grafana agent, push your metrics and logs and visualize them on your dahsboard](/observability/cockpit/api-cli/configuring-grafana-agent/).
+</Message>
+
+<Navigation title="See Also">
+  <PreviousButton to="/observability/cockpit/how-to/access-grafana-and-managed-dashboards/">How to access Grafana and your managed dashboards</PreviousButton>
+  <NextButton to="/observability/cockpit/how-to/deactivate-cockpit/">How to deactivate your Cockpit</NextButton>
+</Navigation>
