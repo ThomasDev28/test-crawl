@@ -1,0 +1,74 @@
+---
+meta:
+  title: Kubernetes Kapsule and Kosmos
+  description: Discover Kubernetes Kapsule and Kosmos - a managed Kubernetes service.
+content:
+  h1: Kubernetes Kapsule and Kosmos
+  paragraph: Discover Kubernetes Kapsule and Kosmos - a managed Kubernetes service.
+hero: assets/kapsule.webp
+---
+
+## What is Kubernetes Kapsule and Kubernetes Kosmos?
+
+Kubernetes is an open-source platform that enables developers to manage their containerized applications. Scaleway Kubernetes Kapsule and Kosmos are powerful tools to help you manage your containerized workloads and services.
+
+They both provide a managed environment for creating, configuring, and running clusters of pre-configured machines.
+
+The primary difference between Kapsule and Kosmos is that Kapsule clusters are composed solely of Scaleway Instances.
+In contrast, Kosmos is a managed multi-cloud Kubernetes Engine that allows you to connect Instances and virtual or dedicated servers from any cloud provider to a single managed Control-Plane.
+
+Regardless of which option you choose, both Kapsule and Kosmos provide an easy-to-use interface for managing your Kubernetes clusters, with the Control-Plane hosted by Scaleway.
+You can use the standardized Kubernetes tool `kubectl` to run commands against your Kubernetes clusters and take full advantage of the features and capabilities of the orchestrator.
+
+Currently, it is available in our **Paris (France)**, **Amsterdam (Netherlands)** and **Warsaw (Poland)** Availability Zones and supports at least the latest version of the last 3 major Kubernetes releases.
+
+### What is a managed Kubernetes service?
+
+In the context of Scaleway, a managed Kubernetes service refers to the Kapsule and Kosmos products, with Scaleway handling the management and maintenance of the Kubernetes control plane, along with all the crucial core components required for the proper operation of the Kubernetes cluster.
+For more information, refer to the [managed Kubernetes service definition](/containers/kubernetes/reference-content/managed-kubernetes-service-definition).
+
+## How much am I billed for one cluster?
+
+The price of the service will depend on the resources you allocate to your cluster, such as the number and type of nodes, the use of load balancers and persistent volumes.
+Nodes are billed at the same price as the underlying Compute Instances.
+
+The Kubernetes control plane is provided without additional costs.
+
+## How much am I billed if I have enabled the auto-scaling feature?
+
+If you enable auto-scaling, you will be able to define a minimum and a maximum number of machines that are available for your pool.
+
+If the workload of your infrastructure is low, only the minimum number of machines will be running. If the load grows, additional machines are started automatically up to the maximum number of machines in the pool, to handle the workload on your application. If the load decreases, these additional machines will be stopped automatically.
+
+## Can I change the type of my cluster after creation (Kapsule to Kosmos, shared to dedicated, etc.)?
+
+The `SetClusterType` API call allows you to upgrade your cluster's control plane from shared to dedicated plans (currently available with 8 GB and 16 GB control planes). However, please keep in mind that certain conversions are not possible.
+For example, moving your workloads from Kapsule to Kosmos or from Kosmos to Kapsule, or downgrading from a dedicated control plane to a shared plan, is not possible. You will need to create a new cluster.
+Please refer to the [API documentation](https://www.scaleway.com/en/developers/api/kubernetes/#path-clusters-change-the-cluster-type) for more information.
+
+## How can I have data persistence on my cluster?
+
+Kapsule is a managed Kubernetes engine. By definition, the nodes of your clusters can be deleted, replaced, or restarted if the applications running on it require it or if a node suddenly stops responding. It means that Kubernetes clusters' nodes are to be considered stateless.
+If you require a stateful application, you can use [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
+The storageClass for Scaleway Block Storage volumes is set by default, so it does not need to be specified.
+For more information, refer to the Kubernetes Kapsule product documentation on [GitHub](https://github.com/scaleway/scaleway-csi/tree/master/examples/kubernetes).
+
+## What can I do if my system volume is running out of space?
+
+To ensure sufficient space for storing default system files and configurations, we recommend a system volume disk capacity of at least 20 GB. While this amount is generally sufficient for small workloads, it is advisable to have a capacity of 100 GB to comfortably store images and system logs in many cases.
+
+If you run out of space on your immutable system volume disk, you can create another pool and use the **Advanced Options** button to set your desired system volume type and size.
+
+Depending on the type of node selected for your pool, one or two types of volume are available:
+
+* **Local storage**: Your system is stored locally on the hypervisor of your node.
+* **Block storage**: A remote storage option where your system is stored on a centralized and resilient cluster.
+
+## What is the service 'kapsule-agent' running on my nodes?
+
+`kapsule-agent` is a software developed internally at Scaleway. It is used to assist in managing nodes lifecycles. Its primary function is to set up the network during the initial boot, and toggle the SSH server on or off based on a k8s label of each node.
+
+## How do I connect to my nodes using SSH?
+
+By default, an SSH server is installed and configured on the nodes of your Kubernetes Kapsule cluster. To ensure the correct behavior of your cluster, it is not recommended to perform actions directly on the nodes. SSH access is provided for debugging only and all actions and configurations should be done using Kubernetes (from the Scaleway Console, `kubectl` command, or Scaleway Kapsule `APIs`).
+To improve the security of your Kapsule cluster, you can disable this SSH server on your nodes by following the documentation on [how to enable or disable SSH on Kubernetes Kapsule nodes](/containers/kubernetes/how-to/enable-disable-ssh/).
